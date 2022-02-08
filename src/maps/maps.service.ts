@@ -6,7 +6,9 @@ import updateMapDto from './dto/updateMap.dto';
 @Injectable()
 export class MapsService {
   private lastMapsId = 0;
-  private maps: Maps[] = [];
+  private maps: Maps[] = [
+    { id: 1, name: 'example map', mapData: 'datatatatat' },
+  ];
 
   getAllMaps() {
     return this.maps;
