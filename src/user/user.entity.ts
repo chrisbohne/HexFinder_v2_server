@@ -1,15 +1,18 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-class MapEntity {
+class UserEntity {
   @PrimaryGeneratedColumn()
   public id: number;
 
-  @Column()
+  @Column({ unique: true })
+  public email: string;
+
+  @Column({ unique: true })
   public name: string;
 
   @Column()
-  public mapData: string;
+  public password: string;
 }
 
-export default MapEntity;
+export default UserEntity;
