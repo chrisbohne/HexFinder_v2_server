@@ -1,49 +1,45 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import Maps from './maps.interface';
 import CreateMapDto from './dto/createMap.dto';
 import updateMapDto from './dto/updateMap.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import MapEntity from './map.entity';
 
 @Injectable()
 export class MapsService {
-  private lastMapsId = 0;
-  private maps: Maps[] = [
-    { id: 1, name: 'example map', mapData: 'datatatatat' },
-  ];
+  constructor(
+    @InjectRepository(MapEntity)
+    private mapRepository: Repository<MapEntity>,
+  ) {}
 
   getAllMaps() {
-    return this.maps;
+    return this.mapRepository.find();
   }
 
-  getMapById(id: number) {
-    const map = this.maps.find((map) => map.id === id);
+  async getMapById(id: number) {
+    const map = await this.mapRepository.findOne(id);
     if (map) {
       return map;
     }
     throw new HttpException('Map not found', HttpStatus.NOT_FOUND);
   }
 
-  createMap(map: CreateMapDto) {
-    const newMap = {
-      id: ++this.lastMapsId,
-      ...map,
-    };
-    this.maps.push(newMap);
+  async createMap(map: CreateMapDto) {
+    const newMap = await this.mapRepository.create(map);
+    await this.mapRepository.save(newMap);
+    return newMap;
   }
 
-  updateMap(id: number, map: updateMapDto) {
-    const mapIndex = this.maps.findIndex((map) => map.id === id);
-    if (mapIndex > -1) {
-      this.maps[mapIndex] = map;
-      return map;
-    }
+  async updateMap(id: number, map: updateMapDto) {
+    await this.mapRepository.update(id, map);
+    const updatedMap = await this.mapRepository.findOne(id);
+    if (updatedMap) return updatedMap;
     throw new HttpException('Map not found', HttpStatus.NOT_FOUND);
   }
 
-  deleteMap(id: number) {
-    const mapIndex = this.maps.findIndex((map) => map.id === id);
-    if (mapIndex > -1) {
-      this.maps.splice(mapIndex, 1);
-    } else {
+  async deleteMap(id: number) {
+    const deleteResponse = await this.mapRepository.delete(id);
+    if (!deleteResponse.affected) {
       throw new HttpException('Map not found', HttpStatus.NOT_FOUND);
     }
   }
