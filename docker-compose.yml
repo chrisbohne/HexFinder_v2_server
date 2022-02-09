@@ -1,23 +1,24 @@
-version: "3.9"
+version: '3'
+
 services:
-  api:
+  nest-api:
     build:
-      dockerfile: Dockerfile
       context: .
+      dockerfile: Dockerfile
+    container_name: hexfinder-api
+    ports:
+      - 8080:3000
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: postgres://user:password@postgres:5432/DATABASE_URL
-      NODE_ENV: development
-      PORT: 3000
-    ports:
-      -"8080:3000"
+      DATABASE_URL: postgres://user:password@postgres:5432/db
 
   postgres:
-    image: postgres:14.1
+    image: postgres:latest
+    container_name: postgres
     ports:
-      -"35000:5432"
+      - 5432:5432
     environment:
       POSTGRES_USER: user
-      POSTGRES_PASSWOrD: password
+      POSTGRES_PASSWORD: password
       POSTGRES_DB: db
