@@ -9,34 +9,34 @@ import {
 } from '@nestjs/common';
 import CreateMapDto from './dto/createMap.dto';
 import updateMapDto from './dto/updateMap.dto';
-import { MapsService } from './maps.service';
+import { MapService } from './map.service';
 
 @Controller('maps')
-export class MapsController {
-  constructor(private readonly mapsService: MapsService) {}
+export class MapController {
+  constructor(private readonly mapService: MapService) {}
 
   @Get()
   getAllMaps() {
-    return this.mapsService.getAllMaps();
+    return this.mapService.getAllMaps();
   }
 
   @Get(':id')
   getMapById(@Param('id') id: string) {
-    return this.mapsService.getMapById(Number(id));
+    return this.mapService.getMapById(Number(id));
   }
 
   @Post()
   async createMap(@Body() map: CreateMapDto) {
-    return this.mapsService.createMap(map);
+    return this.mapService.createMap(map);
   }
 
   @Patch(':id')
   async updateMap(@Param('id') id: string, @Body() map: updateMapDto) {
-    return this.mapsService.updateMap(Number(id), map);
+    return this.mapService.updateMap(Number(id), map);
   }
 
   @Delete(':id')
   async deleteMap(@Param('id') id: string) {
-    this.mapsService.deleteMap(Number(id));
+    this.mapService.deleteMap(Number(id));
   }
 }
