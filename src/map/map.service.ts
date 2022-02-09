@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import MapEntity from './map.entity';
 
 @Injectable()
-export class MapsService {
+export class MapService {
   constructor(
     @InjectRepository(MapEntity)
     private mapRepository: Repository<MapEntity>,
