@@ -6,7 +6,9 @@ import {
   Patch,
   Post,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
+import JwtAuthenticationGuard from 'src/authentication/jwt-authentication.guard';
 import CreateMapDto from './dto/createMap.dto';
 import updateMapDto from './dto/updateMap.dto';
 import { MapService } from './map.service';
@@ -26,6 +28,7 @@ export class MapController {
   }
 
   @Post()
+  @UseGuards(JwtAuthenticationGuard)
   async createMap(@Body() map: CreateMapDto) {
     return this.mapService.createMap(map);
   }

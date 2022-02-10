@@ -10,15 +10,13 @@ services:
       - 8080:3000
     depends_on:
       - postgres
-    environment:
-      DATABASE_URL: postgres://user:password@postgres:5432/db
+    env_file:
+      - docker.env
 
   postgres:
     image: postgres:latest
     container_name: postgres
     ports:
       - 5432:5432
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: db
+    env_file:
+      - docker.env
