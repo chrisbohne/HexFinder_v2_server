@@ -11,35 +11,39 @@ import {
 import JwtAuthenticationGuard from 'src/authentication/jwt-authentication.guard';
 import CreateMapDto from './dto/createMap.dto';
 import updateMapDto from './dto/updateMap.dto';
+import { MapEntity } from './entities/map.entity';
 import { MapService } from './map.service';
 
 @Controller('maps')
 export class MapController {
   constructor(private readonly mapService: MapService) {}
 
+  @Post()
+  @UseGuards(JwtAuthenticationGuard)
+  create(@Body() data: CreateMapDto): Promise<MapEntity> {
+    return this.mapService.create(data);
+  }
+
   @Get()
-  getAllMaps() {
-    return this.mapService.getAllMaps();
+  findAll(): Promise<MapEntity[]> {
+    return this.mapService.findAll();
   }
 
   @Get(':id')
-  getMapById(@Param('id') id: string) {
-    return this.mapService.getMapById(Number(id));
-  }
-
-  @Post()
-  @UseGuards(JwtAuthenticationGuard)
-  async createMap(@Body() map: CreateMapDto) {
-    return this.mapService.createMap(map);
+  findOne(@Param('id') id: string): Promise<MapEntity> {
+    return this.mapService.findOne(+id);
   }
 
   @Patch(':id')
-  async updateMap(@Param('id') id: string, @Body() map: updateMapDto) {
-    return this.mapService.updateMap(Number(id), map);
+  update(
+    @Param('id') id: string,
+    @Body() data: updateMapDto,
+  ): Promise<MapEntity> {
+    return this.mapService.update(+id, data);
   }
 
   @Delete(':id')
-  async deleteMap(@Param('id') id: string) {
-    this.mapService.deleteMap(Number(id));
+  remove(@Param('id') id: string): Promise<MapEntity> {
+    return this.mapService.remove(+id);
   }
 }

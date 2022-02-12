@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MapController } from './map.controller';
 import { MapService } from './map.service';
-import MapEntity from './map.entity';
+import { MapEntity } from './entities/map.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
