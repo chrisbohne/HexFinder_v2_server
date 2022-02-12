@@ -1,7 +1,4 @@
-class updateMapDto {
-  id: number;
-  name: string;
-  mapData: string;
-}
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateMapDto } from './createMap.dto';
 
-export default updateMapDto;
+export class UpdateMapDto extends PartialType(CreateMapDto) {}
