@@ -1,46 +1,30 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
 import CreateMapDto from './dto/createMap.dto';
-import updateMapDto from './dto/updateMap.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import UpdateMapDto from './dto/updateMap.dto';
 import MapEntity from './map.entity';
 
 @Injectable()
 export class MapService {
-  constructor(
-    @InjectRepository(MapEntity)
-    private mapRepository: Repository<MapEntity>,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
-  getAllMaps() {
-    return this.mapRepository.find();
+  create(data: CreateMapDto): Promise<MapEntity> {
+    return this.prisma.map.create({ data });
   }
 
-  async getMapById(id: number) {
-    const map = await this.mapRepository.findOne(id);
-    if (map) {
-      return map;
-    }
-    throw new HttpException('Map not found', HttpStatus.NOT_FOUND);
+  findAll(): Promise<MapEntity[]> {
+    return this.prisma.map.findMany();
   }
 
-  async createMap(map: CreateMapDto) {
-    const newMap = await this.mapRepository.create(map);
-    await this.mapRepository.save(newMap);
-    return newMap;
+  findOne(id: number): Promise<MapEntity> {
+    return this.prisma.map.findUnique({ where: { id } });
   }
 
-  async updateMap(id: number, map: updateMapDto) {
-    await this.mapRepository.update(id, map);
-    const updatedMap = await this.mapRepository.findOne(id);
-    if (updatedMap) return updatedMap;
-    throw new HttpException('Map not found', HttpStatus.NOT_FOUND);
+  update(id: number, data: UpdateMapDto): Promise<MapEntity> {
+    return this.prisma.map.update({ where: { id }, data });
   }
 
-  async deleteMap(id: number) {
-    const deleteResponse = await this.mapRepository.delete(id);
-    if (!deleteResponse.affected) {
-      throw new HttpException('Map not found', HttpStatus.NOT_FOUND);
-    }
+  remove(id: number): Promise<MapEntity> {
+    return this.prisma.map.delete({ where: { id } });
   }
 }
