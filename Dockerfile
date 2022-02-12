@@ -1,8 +1,9 @@
 FROM node:16
 
-WORKDIR /src/app
+WORKDIR /app
 
 COPY package*.json ./
+COPY prisma ./prisma/
 
 RUN npm install
 
