@@ -11,7 +11,7 @@ import {
 import JwtAuthenticationGuard from 'src/authentication/jwt-authentication.guard';
 import CreateMapDto from './dto/createMap.dto';
 import updateMapDto from './dto/updateMap.dto';
-import MapEntity from './map.entity';
+import { MapEntity } from './entities/map.entity';
 import { MapService } from './map.service';
 
 @Controller('maps')
