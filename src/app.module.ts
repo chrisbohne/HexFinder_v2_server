@@ -11,8 +11,8 @@ import * as Joi from 'joi';
     ConfigModule.forRoot({
       validationSchema: Joi.object({
         JWT_SECRET: Joi.string().required(),
-        JWT_EXPIRATION_TIME: Joi.string().required,
-        DATABASE_URL: Joi.string().required,
+        JWT_EXPIRATION_TIME: Joi.string().required(),
+        DATABASE_URL: Joi.string().required(),
       }),
       isGlobal: true,
     }),

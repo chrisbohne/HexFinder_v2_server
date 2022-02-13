@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
+import { UserEntity } from 'src/users/entities/user.entity';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -36,9 +37,14 @@ export class AuthController {
   //   return response.send(user);
   // }
 
+  @HttpCode(200)
+  @UseGuards(LocalAuthGuard)
   @Post('login')
-  login(@Body() data: LoginDto) {
-    return this.authService.login(data);
+  async login(@Req() req: RequestWithUser, @Res() res: Response) {
+    const { user } = req;
+    const cookie = this.authService.getCookieWithJwtToken(user.id);
+    res.setHeader('Set-Cookie', cookie);
+    return res.send(user);
   }
 
   // @UseGuards(JwtAuthenticationGuard)
