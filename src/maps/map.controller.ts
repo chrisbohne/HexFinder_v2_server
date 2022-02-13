@@ -8,9 +8,9 @@ import {
   Delete,
   UseGuards,
 } from '@nestjs/common';
-import JwtAuthenticationGuard from 'src/authentication/jwt-authentication.guard';
-import CreateMapDto from './dto/createMap.dto';
-import updateMapDto from './dto/updateMap.dto';
+import JwtAuthenticationGuard from 'src/auth/guards/jwt-auth.guard';
+import { CreateMapDto } from './dto/createMap.dto';
+import { UpdateMapDto } from './dto/updateMap.dto';
 import { MapEntity } from './entities/map.entity';
 import { MapService } from './map.service';
 
@@ -37,7 +37,7 @@ export class MapController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() data: updateMapDto,
+    @Body() data: UpdateMapDto,
   ): Promise<MapEntity> {
     return this.mapService.update(+id, data);
   }

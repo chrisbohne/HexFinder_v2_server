@@ -47,6 +47,12 @@ export class UserService {
     return user;
   }
 
+  async findById(id: number): Promise<UserEntity> {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException();
+    return user;
+  }
+
   update(id, data: UpdateUserDto): Promise<UserEntity> {
     return this.prisma.user.update({ where: { id }, data });
   }
