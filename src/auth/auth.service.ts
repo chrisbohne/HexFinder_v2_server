@@ -3,7 +3,6 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/users/user.service';
 import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
-// import TokenPayload from './interfaces/tokenPayload.interface';
 import { AuthResponse } from './dto/authResponse.dto';
 import { LoginDto } from './dto/login.dto';
 import { UserEntity } from 'src/users/entities/user.entity';
@@ -64,7 +63,7 @@ export class AuthService {
     )}`;
   }
 
-  // public getCookieForLogout() {
-  //   return `Authentication=; HttpOnly; Path=/; Mag-Age=0`;
-  // }
+  getCookieForLogout() {
+    return `Authentication=; HttpOnly; Path=/; Mag-Age=0`;
+  }
 }
