@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import CreateMapDto from './dto/createMap.dto';
-import UpdateMapDto from './dto/updateMap.dto';
+import { CreateMapDto } from './dto/createMap.dto';
+import { UpdateMapDto } from './dto/updateMap.dto';
 import { MapEntity } from './entities/map.entity';
 
 @Injectable()
