@@ -7,4 +7,5 @@ export class MapEntity implements Map {
   name: string;
   mapData: string;
   userId: number;
+  public: boolean;
 }
