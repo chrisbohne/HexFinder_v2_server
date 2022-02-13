@@ -14,7 +14,8 @@ model Map {
 
   name    String
   mapData String
-  User    User?  @relation(fields: [userId], references: [id])
+  public  Boolean @default(true)
+  User    User?   @relation(fields: [userId], references: [id])
   userId  Int?
 }
 
