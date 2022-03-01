@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
-import { RegisterDto } from './dto/register.dto';
+import { RegisterDto } from './dto';
 import JwtAuthenticationGuard from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import RequestWithUser from './interfaces/requestWithUser.interface';
@@ -19,8 +19,8 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  async register(@Body() data: RegisterDto) {
-    return this.authService.register(data);
+  async register(@Body() dto: RegisterDto) {
+    return this.authService.register(dto);
   }
 
   @HttpCode(200)

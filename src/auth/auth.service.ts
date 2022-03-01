@@ -17,8 +17,8 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  async register(data: RegisterDto): Promise<AuthResponse> {
-    const user = await this.userService.create(data);
+  async register(dto: RegisterDto): Promise<AuthResponse> {
+    const user = await this.userService.create(dto);
     return {
       token: this.jwtService.sign({ email: user.email }),
       user,

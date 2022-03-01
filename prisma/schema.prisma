@@ -21,6 +21,8 @@ model Map {
 
 model User {
   id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
 
   name     String @unique
   email    String @unique

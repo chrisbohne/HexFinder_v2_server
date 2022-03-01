@@ -13,18 +13,18 @@ import { UpdateUserDto } from './dto/updateUser.dto';
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: CreateUserDto): Promise<UserEntity> {
+  async create(dto: CreateUserDto): Promise<UserEntity> {
     const userAlreadyExists = await this.prisma.user.findUnique({
-      where: { name: data.name },
+      where: { name: dto.name },
     });
     if (userAlreadyExists) {
       throw new ConflictException('Username already taken');
     }
 
-    const hash = await bcrypt.hash(data.password, 10);
+    const hash = await bcrypt.hash(dto.password, 10);
 
     const user = await this.prisma.user.create({
-      data: { ...data, password: hash },
+      data: { ...dto, password: hash },
     });
 
     user.password = undefined;
