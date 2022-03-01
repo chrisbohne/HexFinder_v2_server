@@ -1,5 +1,5 @@
 import {
-  ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -8,27 +8,29 @@ import { CreateUserDto } from './dto/createUser.dto';
 import { UserEntity } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/updateUser.dto';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: CreateUserDto): Promise<UserEntity> {
-    const userAlreadyExists = await this.prisma.user.findUnique({
-      where: { name: data.name },
-    });
-    if (userAlreadyExists) {
-      throw new ConflictException('Username already taken');
+  async create(dto: CreateUserDto): Promise<UserEntity> {
+    const hash = await bcrypt.hash(dto.password, 10);
+    try {
+      const user = await this.prisma.user.create({
+        data: { ...dto, password: hash },
+      });
+
+      delete user.password;
+      return user;
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ForbiddenException('Credentials taken');
+        }
+      }
+      throw error;
     }
-
-    const hash = await bcrypt.hash(data.password, 10);
-
-    const user = await this.prisma.user.create({
-      data: { ...data, password: hash },
-    });
-
-    user.password = undefined;
-    return user;
   }
 
   findAll(): Promise<UserEntity[]> {
