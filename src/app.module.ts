@@ -21,6 +21,5 @@ import * as Joi from 'joi';
     AuthModule,
     PrismaModule,
   ],
-  providers: [],
 })
 export class AppModule {}

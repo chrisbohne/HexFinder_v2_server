@@ -8,8 +8,8 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @Post()
-  create(@Body() data: CreateUserDto): Promise<UserEntity> {
-    return this.userService.create(data);
+  create(@Body() dto: CreateUserDto): Promise<UserEntity> {
+    return this.userService.create(dto);
   }
 
   @Get()

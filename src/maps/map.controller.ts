@@ -8,7 +8,7 @@ import {
   Delete,
   UseGuards,
 } from '@nestjs/common';
-import JwtAuthenticationGuard from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateMapDto } from './dto/createMap.dto';
 import { UpdateMapDto } from './dto/updateMap.dto';
 import { MapEntity } from './entities/map.entity';
@@ -19,7 +19,7 @@ export class MapController {
   constructor(private readonly mapService: MapService) {}
 
   @Post()
-  @UseGuards(JwtAuthenticationGuard)
+  @UseGuards(JwtAuthGuard)
   create(@Body() data: CreateMapDto): Promise<MapEntity> {
     return this.mapService.create(data);
   }

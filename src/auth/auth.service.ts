@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/users/user.service';
 import { RegisterDto } from './dto/register.dto';
@@ -8,6 +12,7 @@ import { LoginDto } from './dto/login.dto';
 import { UserEntity } from 'src/users/entities/user.entity';
 import TokenPayload from './interfaces/tokenPayload.interface';
 import { ConfigService } from '@nestjs/config';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +20,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private prisma: PrismaService,
   ) {}
 
   async register(dto: RegisterDto): Promise<AuthResponse> {
@@ -23,6 +29,21 @@ export class AuthService {
       token: this.jwtService.sign({ email: user.email }),
       user,
     };
+  }
+
+  async login(dto: LoginDto): Promise<AuthResponse> {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+    if (!user) throw new ForbiddenException('Wrong credentials provided');
+
+    await this.verifyPassword(dto.password, user.password);
+
+    const response = await this.signToken(user.id, user.email);
+
+    delete user.password;
+
+    return { ...response, user };
   }
 
   async validateUser({ email, password }: LoginDto): Promise<UserEntity> {
@@ -52,7 +73,7 @@ export class AuthService {
   async verifyPassword(password: string, hash: string) {
     const matchingPassword = await bcrypt.compare(password, hash);
     if (!matchingPassword)
-      throw new UnauthorizedException('Wrong credentials provided');
+      throw new ForbiddenException('Wrong credentials provided');
   }
 
   getCookieWithJwtToken(userId: number) {
@@ -64,6 +85,17 @@ export class AuthService {
   }
 
   getCookieForLogout() {
-    return `Authentication=; HttpOnly; Path=/; Mag-Age=0`;
+    return `Authentication=; HttpOnly; Path=/; Max-Age=0`;
+  }
+
+  async signToken(userId: number, email: string): Promise<{ token: string }> {
+    const payload = { sub: userId, email };
+    const secret = this.configService.get('JWT_SECRET');
+    const token = await this.jwtService.signAsync(payload, {
+      expiresIn: '15m',
+      secret: secret,
+    });
+
+    return { token: token };
   }
 }
