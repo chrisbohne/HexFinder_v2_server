@@ -5,12 +5,9 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/users/user.service';
-import { RegisterDto } from './dto/register.dto';
+import { RegisterDto, AuthResponse, LoginDto } from './dto';
 import * as bcrypt from 'bcrypt';
-import { AuthResponse } from './dto/authResponse.dto';
-import { LoginDto } from './dto/login.dto';
 import { UserEntity } from 'src/users/entities/user.entity';
-import TokenPayload from './interfaces/tokenPayload.interface';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -25,10 +22,9 @@ export class AuthService {
 
   async register(dto: RegisterDto): Promise<AuthResponse> {
     const user = await this.userService.create(dto);
-    return {
-      token: this.jwtService.sign({ email: user.email }),
-      user,
-    };
+
+    const cookie = await this.getCookieWithJwtToken(user.id, user.email);
+    return { cookie, user };
   }
 
   async login(dto: LoginDto): Promise<AuthResponse> {
@@ -39,11 +35,11 @@ export class AuthService {
 
     await this.verifyPassword(dto.password, user.password);
 
-    const response = await this.signToken(user.id, user.email);
+    const cookie = await this.getCookieWithJwtToken(user.id, user.email);
 
     delete user.password;
 
-    return { ...response, user };
+    return { cookie, user };
   }
 
   async validateUser({ email, password }: LoginDto): Promise<UserEntity> {
@@ -76,26 +72,18 @@ export class AuthService {
       throw new ForbiddenException('Wrong credentials provided');
   }
 
-  getCookieWithJwtToken(userId: number) {
-    const payload: TokenPayload = { userId };
-    const token = this.jwtService.sign(payload);
-    return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get(
-      'JWT_EXPIRATION_TIME',
-    )}`;
+  async getCookieWithJwtToken(userId: number, email: string): Promise<string> {
+    const payload = { sub: userId, email };
+    const secret = this.configService.get('JWT_SECRET');
+    const expiresIn = this.configService.get('JWT_EXPIRATION_TIME');
+    const token = await this.jwtService.signAsync(payload, {
+      expiresIn,
+      secret,
+    });
+    return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${expiresIn}`;
   }
 
   getCookieForLogout() {
     return `Authentication=; HttpOnly; Path=/; Max-Age=0`;
-  }
-
-  async signToken(userId: number, email: string): Promise<{ token: string }> {
-    const payload = { sub: userId, email };
-    const secret = this.configService.get('JWT_SECRET');
-    const token = await this.jwtService.signAsync(payload, {
-      expiresIn: '15m',
-      secret: secret,
-    });
-
-    return { token: token };
   }
 }

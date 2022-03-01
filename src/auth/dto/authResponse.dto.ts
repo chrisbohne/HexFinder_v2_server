@@ -1,6 +1,6 @@
 import { User } from '@prisma/client';
 
 export class AuthResponse {
-  token: string;
+  cookie: string;
   user: User;
 }

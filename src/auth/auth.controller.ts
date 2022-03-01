@@ -19,29 +19,29 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  async register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto);
+  async register(@Body() dto: RegisterDto, @Res() res: Response) {
+    const data = await this.authService.register(dto);
+    res.setHeader('Set-Cookie', data.cookie);
+    res.send({ user: data.user });
   }
 
   @HttpCode(200)
   @Post('login')
   async login(@Body() dto: LoginDto, @Res() res: Response) {
     const data = await this.authService.login(dto);
-    res.set('Authorization', 'Bearer ' + data.token);
-    res.send({
-      user: data.user,
-    });
+    res.setHeader('Set-Cookie', data.cookie);
+    res.send({ user: data.user });
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  async logout(@Res() response: Response) {
-    response.setHeader('Set-Cookie', this.authService.getCookieForLogout());
-    return response.sendStatus(200);
+  async logout(@Res() res: Response) {
+    res.setHeader('Set-Cookie', this.authService.getCookieForLogout());
+    return res.sendStatus(200);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get()
+  @Get('me')
   authenticate(@Req() request: RequestWithUser) {
     const user = request.user;
     user.password = undefined;
