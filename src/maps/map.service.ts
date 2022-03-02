@@ -9,8 +9,10 @@ import { MapEntity } from './entities/map.entity';
 export class MapService {
   constructor(private prisma: PrismaService) {}
 
-  create(dto: CreateMapDto): Promise<MapEntity> {
-    return this.prisma.map.create({ data: dto });
+  create(dto: CreateMapDto, userId: number): Promise<MapEntity> {
+    return this.prisma.map.create({
+      data: { ...dto, User: { connect: { id: userId } } },
+    });
   }
 
   findAll(): Promise<MapEntity[]> {

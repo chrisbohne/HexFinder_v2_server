@@ -6,9 +6,7 @@ import {
   Patch,
   Post,
   Delete,
-  UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateMapDto } from './dto/createMap.dto';
 import { UpdateMapDto } from './dto/updateMap.dto';
 import { MapEntity } from './entities/map.entity';
@@ -18,32 +16,31 @@ import { MapService } from './map.service';
 export class MapController {
   constructor(private readonly mapService: MapService) {}
 
-  @Post()
-  @UseGuards(JwtAuthGuard)
-  create(@Body() data: CreateMapDto): Promise<MapEntity> {
-    return this.mapService.create(data);
+  @Post(':userId')
+  create(@Param('userId') userId: string, @Body() dto: CreateMapDto) {
+    return this.mapService.create(dto, +userId);
   }
 
   @Get()
-  findAll(): Promise<MapEntity[]> {
+  findAll() {
     return this.mapService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<MapEntity> {
+  findOne(@Param('id') id: string) {
     return this.mapService.findOne(+id);
   }
 
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() data: UpdateMapDto,
+    @Body() dto: UpdateMapDto,
   ): Promise<MapEntity> {
-    return this.mapService.update(+id, data);
+    return this.mapService.update(+id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<MapEntity> {
+  remove(@Param('id') id: string) {
     return this.mapService.remove(+id);
   }
 }
