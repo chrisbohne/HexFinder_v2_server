@@ -1,13 +1,8 @@
-import {
-  ForbiddenException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/users/user.service';
 import { RegisterDto, AuthResponse, LoginDto } from './dto';
 import * as bcrypt from 'bcrypt';
-import { UserEntity } from 'src/users/entities/user.entity';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -31,7 +26,7 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
-    if (!user) throw new ForbiddenException('Wrong credentials provided');
+    if (!user) throw new UnauthorizedException('Wrong credentials provided');
 
     await this.verifyPassword(dto.password, user.password);
 
@@ -42,34 +37,10 @@ export class AuthService {
     return { cookie, user };
   }
 
-  async validateUser({ email, password }: LoginDto): Promise<UserEntity> {
-    const user = await this.userService.findByEmail(email);
-    const passwordValid = await bcrypt.compare(password, user.password);
-
-    if (!passwordValid) {
-      throw new UnauthorizedException('Invalid Email or Password');
-    }
-
-    return user;
-  }
-
-  async getAuthenticatedUser({
-    email,
-    password,
-  }: LoginDto): Promise<UserEntity> {
-    try {
-      const user = await this.userService.findByEmail(email);
-      await this.verifyPassword(password, user.password);
-      return user;
-    } catch (error) {
-      throw new UnauthorizedException('Wrong credentials provided');
-    }
-  }
-
   async verifyPassword(password: string, hash: string) {
     const matchingPassword = await bcrypt.compare(password, hash);
     if (!matchingPassword)
-      throw new ForbiddenException('Wrong credentials provided');
+      throw new UnauthorizedException('Wrong credentials provided');
   }
 
   async getCookieWithJwtToken(userId: number, email: string): Promise<string> {

@@ -24,10 +24,11 @@ export class UserService {
       delete user.password;
       return user;
     } catch (error) {
-      if (error instanceof PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          throw new ForbiddenException('Credentials taken');
-        }
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ForbiddenException('Credentials taken');
       }
       throw error;
     }
@@ -37,29 +38,41 @@ export class UserService {
     return this.prisma.user.findMany();
   }
 
-  async findByName(name: string): Promise<UserEntity> {
-    const user = await this.prisma.user.findUnique({ where: { name } });
-    if (!user) throw new NotFoundException();
-    return user;
-  }
-
-  async findByEmail(email: string): Promise<UserEntity> {
-    const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) throw new NotFoundException();
-    return user;
-  }
-
-  async findById(id: number): Promise<UserEntity> {
+  async findOne(id: number): Promise<UserEntity> {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) throw new NotFoundException();
+    delete user.password;
     return user;
   }
 
-  update(id, data: UpdateUserDto): Promise<UserEntity> {
-    return this.prisma.user.update({ where: { id }, data });
+  async update(id, dto: UpdateUserDto): Promise<UserEntity> {
+    try {
+      const updatedUser = await this.prisma.user.update({
+        where: { id },
+        data: dto,
+      });
+      delete updatedUser.password;
+      return updatedUser;
+    } catch (error) {
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException('User not found');
+      } else throw error;
+    }
   }
 
-  remove(id: number): Promise<UserEntity> {
-    return this.prisma.user.delete({ where: { id } });
+  async remove(id: number): Promise<UserEntity> {
+    try {
+      return await this.prisma.user.delete({ where: { id } });
+    } catch (error) {
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException('User not found');
+      } else throw error;
+    }
   }
 }
