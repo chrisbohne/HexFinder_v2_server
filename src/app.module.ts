@@ -4,6 +4,8 @@ import { MapModule } from './maps/map.module';
 import { UserModule } from './users/user.module';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { TopicsModule } from './topics/topics.module';
+import { CommentsModule } from './comments/comments.module';
 import * as Joi from 'joi';
 
 @Module({
@@ -20,6 +22,8 @@ import * as Joi from 'joi';
     UserModule,
     AuthModule,
     PrismaModule,
+    TopicsModule,
+    CommentsModule,
   ],
 })
 export class AppModule {}

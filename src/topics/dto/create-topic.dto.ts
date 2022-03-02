@@ -1,12 +1,12 @@
 import { IsNotEmpty, IsString, MaxLength } from 'class-validator';
 
-export class CreateMapDto {
+export class CreateTopicDto {
   @IsNotEmpty()
   @MaxLength(50)
   @IsString()
-  name: string;
+  title: string;
 
   @IsNotEmpty()
   @IsString()
-  mapData: string;
+  content: string;
 }

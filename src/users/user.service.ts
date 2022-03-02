@@ -4,10 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateUserDto } from './dto/createUser.dto';
-import { UserEntity } from './entities/user.entity';
+import { CreateUserDto, UpdateUserDto } from './dto';
+import { UserEntity } from './entities';
 import * as bcrypt from 'bcrypt';
-import { UpdateUserDto } from './dto/updateUser.dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 
 @Injectable()
@@ -24,10 +23,11 @@ export class UserService {
       delete user.password;
       return user;
     } catch (error) {
-      if (error instanceof PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          throw new ForbiddenException('Credentials taken');
-        }
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ForbiddenException('Credentials taken');
       }
       throw error;
     }
@@ -37,29 +37,45 @@ export class UserService {
     return this.prisma.user.findMany();
   }
 
-  async findByName(name: string): Promise<UserEntity> {
-    const user = await this.prisma.user.findUnique({ where: { name } });
+  async findOne(id: number): Promise<UserEntity> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      include: { maps: true, topics: true, comments: true },
+    });
     if (!user) throw new NotFoundException();
+    delete user.password;
     return user;
   }
 
-  async findByEmail(email: string): Promise<UserEntity> {
-    const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) throw new NotFoundException();
-    return user;
+  async update(id, dto: UpdateUserDto): Promise<UserEntity> {
+    try {
+      const updatedUser = await this.prisma.user.update({
+        where: { id },
+        data: dto,
+      });
+      delete updatedUser.password;
+      return updatedUser;
+    } catch (error) {
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException('User not found');
+      } else throw error;
+    }
   }
 
-  async findById(id: number): Promise<UserEntity> {
-    const user = await this.prisma.user.findUnique({ where: { id } });
-    if (!user) throw new NotFoundException();
-    return user;
-  }
-
-  update(id, data: UpdateUserDto): Promise<UserEntity> {
-    return this.prisma.user.update({ where: { id }, data });
-  }
-
-  remove(id: number): Promise<UserEntity> {
-    return this.prisma.user.delete({ where: { id } });
+  async remove(id: number): Promise<string> {
+    try {
+      await this.prisma.user.delete({ where: { id } });
+      return 'User deleted';
+    } catch (error) {
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === 'P2025'
+      ) {
+        throw new NotFoundException('User not found');
+      } else throw error;
+    }
   }
 }
