@@ -7,9 +7,8 @@ import {
   Post,
   Delete,
 } from '@nestjs/common';
-import { CreateMapDto } from './dto/createMap.dto';
-import { UpdateMapDto } from './dto/updateMap.dto';
-import { MapEntity } from './entities/map.entity';
+import { CreateMapDto, UpdateMapDto } from './dto';
+import { MapEntity } from './entities';
 import { MapService } from './map.service';
 
 @Controller('maps')
@@ -32,10 +31,7 @@ export class MapController {
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() dto: UpdateMapDto,
-  ): Promise<MapEntity> {
+  update(@Param('id') id: string, @Body() dto: UpdateMapDto) {
     return this.mapService.update(+id, dto);
   }
 

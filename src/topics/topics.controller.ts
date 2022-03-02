@@ -1,15 +1,23 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { TopicsService } from './topics.service';
-import { CreateTopicDto } from './dto/create-topic.dto';
-import { UpdateTopicDto } from './dto/update-topic.dto';
+import { CreateTopicDto, UpdateTopicDto } from './dto';
 
 @Controller('topics')
 export class TopicsController {
   constructor(private readonly topicsService: TopicsService) {}
 
-  @Post()
-  create(@Body() createTopicDto: CreateTopicDto) {
-    return this.topicsService.create(createTopicDto);
+  @Post(':userId')
+  create(@Body() dto: CreateTopicDto, @Param('userId') userId: string) {
+    console.log(userId);
+    return this.topicsService.create(dto, +userId);
   }
 
   @Get()
@@ -23,8 +31,8 @@ export class TopicsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTopicDto: UpdateTopicDto) {
-    return this.topicsService.update(+id, updateTopicDto);
+  update(@Param('id') id: string, @Body() dto: UpdateTopicDto) {
+    return this.topicsService.update(+id, dto);
   }
 
   @Delete(':id')

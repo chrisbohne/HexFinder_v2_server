@@ -1,9 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateMapDto } from './dto/createMap.dto';
-import { UpdateMapDto } from './dto/updateMap.dto';
-import { MapEntity } from './entities/map.entity';
+import { CreateMapDto, UpdateMapDto } from './dto';
+import { MapEntity } from './entities';
 
 @Injectable()
 export class MapService {
@@ -25,9 +24,9 @@ export class MapService {
     return map;
   }
 
-  async update(id: number, data: UpdateMapDto): Promise<MapEntity> {
+  async update(id: number, dto: UpdateMapDto): Promise<MapEntity> {
     try {
-      return await this.prisma.map.update({ where: { id }, data });
+      return await this.prisma.map.update({ where: { id }, data: dto });
     } catch (error) {
       if (
         error instanceof PrismaClientKnownRequestError &&
