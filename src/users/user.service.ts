@@ -62,9 +62,10 @@ export class UserService {
     }
   }
 
-  async remove(id: number): Promise<UserEntity> {
+  async remove(id: number): Promise<string> {
     try {
-      return await this.prisma.user.delete({ where: { id } });
+      await this.prisma.user.delete({ where: { id } });
+      return 'User deleted';
     } catch (error) {
       if (
         error instanceof PrismaClientKnownRequestError &&
