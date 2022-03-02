@@ -40,7 +40,7 @@ export class UserService {
   async findOne(id: number): Promise<UserEntity> {
     const user = await this.prisma.user.findUnique({
       where: { id },
-      include: { maps: true, topics: true },
+      include: { maps: true, topics: true, comments: true },
     });
     if (!user) throw new NotFoundException();
     delete user.password;

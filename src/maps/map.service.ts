@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateMapDto, UpdateMapDto } from './dto';
@@ -24,9 +28,19 @@ export class MapService {
     return map;
   }
 
-  async update(id: number, dto: UpdateMapDto): Promise<MapEntity> {
+  async update(
+    mapId: number,
+    userId: number,
+    dto: UpdateMapDto,
+  ): Promise<MapEntity> {
+    const map = await this.prisma.map.findUnique({ where: { id: mapId } });
+
+    if (!map || map.userId !== userId) {
+      throw new ForbiddenException('Access denied');
+    }
+
     try {
-      return await this.prisma.map.update({ where: { id }, data: dto });
+      return await this.prisma.map.update({ where: { id: mapId }, data: dto });
     } catch (error) {
       if (
         error instanceof PrismaClientKnownRequestError &&
@@ -37,9 +51,15 @@ export class MapService {
     }
   }
 
-  async remove(id: number): Promise<string> {
+  async remove(mapId: number, userId: number): Promise<string> {
+    const map = await this.prisma.map.findUnique({ where: { id: mapId } });
+
+    if (!map || map.userId !== userId) {
+      throw new ForbiddenException('Access denied');
+    }
+
     try {
-      await this.prisma.map.delete({ where: { id } });
+      await this.prisma.map.delete({ where: { id: mapId } });
       return 'Map deleted';
     } catch (error) {
       if (

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateTopicDto, UpdateTopicDto } from './dto';
@@ -15,18 +19,36 @@ export class TopicsService {
   }
 
   findAll(): Promise<TopicEntity[]> {
-    return this.prisma.topic.findMany();
+    return this.prisma.topic.findMany({
+      include: { comments: true, User: true },
+    });
   }
 
   async findOne(id: number): Promise<TopicEntity> {
-    const topic = await this.prisma.topic.findUnique({ where: { id } });
+    const topic = await this.prisma.topic.findUnique({
+      where: { id },
+      include: { comments: true, User: true },
+    });
     if (!topic) throw new NotFoundException('Topic not found');
     return topic;
   }
 
-  async update(id: number, dto: UpdateTopicDto): Promise<TopicEntity> {
+  async update(
+    topicId: number,
+    userId: number,
+    dto: UpdateTopicDto,
+  ): Promise<TopicEntity> {
+    const topic = await this.prisma.map.findUnique({ where: { id: topicId } });
+
+    if (!topic || topic.userId !== userId) {
+      throw new ForbiddenException('Access denied');
+    }
+
     try {
-      return await this.prisma.topic.update({ where: { id }, data: dto });
+      return await this.prisma.topic.update({
+        where: { id: topicId },
+        data: dto,
+      });
     } catch (error) {
       if (
         error instanceof PrismaClientKnownRequestError &&
@@ -37,9 +59,15 @@ export class TopicsService {
     }
   }
 
-  async remove(id: number): Promise<string> {
+  async remove(topicId: number, userId: number): Promise<string> {
+    const topic = await this.prisma.map.findUnique({ where: { id: topicId } });
+
+    if (!topic || topic.userId !== userId) {
+      throw new ForbiddenException('Access denied');
+    }
+
     try {
-      await this.prisma.topic.delete({ where: { id } });
+      await this.prisma.topic.delete({ where: { id: topicId } });
       return 'Topic deleted';
     } catch (error) {
       if (
