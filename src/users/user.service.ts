@@ -4,10 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateUserDto } from './dto/createUser.dto';
-import { UserEntity } from './entities/user.entity';
+import { CreateUserDto, UpdateUserDto } from './dto';
+import { UserEntity } from './entities';
 import * as bcrypt from 'bcrypt';
-import { UpdateUserDto } from './dto/updateUser.dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 
 @Injectable()

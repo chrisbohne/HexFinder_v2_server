@@ -7,9 +7,7 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/createUser.dto';
-import { UpdateUserDto } from './dto/updateUser.dto';
-import { UserEntity } from './entities/user.entity';
+import { CreateUserDto, UpdateUserDto } from './dto';
 import { UserService } from './user.service';
 
 @Controller('users')
@@ -32,10 +30,7 @@ export class UserController {
   }
 
   @Patch(':id')
-  updateOne(
-    @Param('id') id: string,
-    @Body() dto: UpdateUserDto,
-  ): Promise<UserEntity> {
+  updateOne(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     return this.userService.update(+id, dto);
   }
 
