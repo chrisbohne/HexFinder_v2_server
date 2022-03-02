@@ -50,9 +50,10 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('me')
   getUser(@Req() req: RequestWithUser) {
-    const user = req.user;
-    user.password = undefined;
-    return user;
+    const { id } = req.user;
+    return this.userService.findOne(+id);
+    // user.password = undefined;
+    // return user;
   }
 
   @UseGuards(JwtAuthGuard)
