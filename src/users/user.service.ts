@@ -19,8 +19,6 @@ export class UserService {
       const user = await this.prisma.user.create({
         data: { ...dto, password: hash },
       });
-
-      delete user.password;
       return user;
     } catch (error) {
       if (
@@ -43,7 +41,6 @@ export class UserService {
       include: { maps: true, topics: true, comments: true },
     });
     if (!user) throw new NotFoundException();
-    delete user.password;
     return user;
   }
 
@@ -53,7 +50,6 @@ export class UserService {
         where: { id },
         data: dto,
       });
-      delete updatedUser.password;
       return updatedUser;
     } catch (error) {
       if (
