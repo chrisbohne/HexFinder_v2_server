@@ -63,7 +63,8 @@ export class UserService {
 
   async remove(id: number): Promise<string> {
     try {
-      await this.prisma.user.delete({ where: { id } });
+      await this.prisma.map.deleteMany({ where: { userId: id } });
+      await this.prisma.user.delete({ where: { id }, include: { maps: true } });
       return 'User deleted';
     } catch (error) {
       if (

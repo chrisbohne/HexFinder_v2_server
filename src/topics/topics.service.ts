@@ -20,7 +20,7 @@ export class TopicsService {
 
   findAll(): Promise<TopicEntity[]> {
     return this.prisma.topic.findMany({
-      include: { comments: true, user: true },
+      include: { comments: true, user: { select: { name: true } } },
     });
   }
 

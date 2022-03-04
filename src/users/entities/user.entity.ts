@@ -10,7 +10,7 @@ export class UserEntity implements User {
   name: string;
   email: string;
 
-  @Exclude({ toPlainOnly: true })
+  @Exclude()
   password: string;
 
   constructor(partial: Partial<UserEntity>) {

@@ -8,6 +8,8 @@ import {
   Delete,
   UseGuards,
   Req,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { TopicsService } from './topics.service';
 import { CreateTopicDto, UpdateTopicDto } from './dto';
@@ -15,6 +17,7 @@ import { JwtAuthGuard } from 'src/auth/guards';
 import { RequestWithUser } from 'src/auth/interfaces';
 
 @Controller('topics')
+@UseInterceptors(ClassSerializerInterceptor)
 export class TopicsController {
   constructor(private readonly topicsService: TopicsService) {}
 

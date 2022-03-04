@@ -52,21 +52,21 @@ export class UserController {
   // as logged in user
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  getUser(@Req() req: RequestWithUser) {
+  async getUser(@Req() req: RequestWithUser) {
     const { id } = req.user;
-    return this.userService.findOne(id);
+    return new UserEntity(await this.userService.findOne(id));
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch('me')
-  updateMap(@Body() dto: UpdateUserDto, @Req() req: RequestWithUser) {
+  async updateUser(@Body() dto: UpdateUserDto, @Req() req: RequestWithUser) {
     const { id } = req.user;
-    return this.userService.update(id, dto);
+    return new UserEntity(await this.userService.update(id, dto));
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete('me')
-  deleteMap(@Req() req: RequestWithUser) {
+  deleteUser(@Req() req: RequestWithUser) {
     const { id } = req.user;
     return this.userService.remove(id);
   }
