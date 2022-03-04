@@ -14,20 +14,20 @@ export class TopicsService {
 
   create(dto: CreateTopicDto, userId: number): Promise<TopicEntity> {
     return this.prisma.topic.create({
-      data: { ...dto, User: { connect: { id: userId } } },
+      data: { ...dto, user: { connect: { id: userId } } },
     });
   }
 
   findAll(): Promise<TopicEntity[]> {
     return this.prisma.topic.findMany({
-      include: { comments: true, User: true },
+      include: { comments: true, user: true },
     });
   }
 
   async findOne(id: number): Promise<TopicEntity> {
     const topic = await this.prisma.topic.findUnique({
       where: { id },
-      include: { comments: true, User: true },
+      include: { comments: true, user: true },
     });
     if (!topic) throw new NotFoundException('Topic not found');
     return topic;

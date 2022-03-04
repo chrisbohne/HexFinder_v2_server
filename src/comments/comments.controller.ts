@@ -20,7 +20,7 @@ export class CommentsController {
 
   // as admin
 
-  @Post('/:topicId/:userId')
+  @Post('new/:topicId/:userId')
   create(
     @Body() dto: CreateCommentDto,
     @Param('userId') userId: string,
@@ -30,17 +30,17 @@ export class CommentsController {
     return this.commentsService.create(+topicId, +userId, dto);
   }
 
-  @Get()
+  @Get('get')
   findAll() {
     return this.commentsService.findAll();
   }
 
-  @Get(':id')
+  @Get('get/:id')
   findOne(@Param('id') id: string) {
     return this.commentsService.findOne(+id);
   }
 
-  @Patch(':commentId/:userId')
+  @Patch('update/:commentId/:userId')
   update(
     @Param('commentId') commentId: string,
     @Param('userId') userId: string,
@@ -59,18 +59,18 @@ export class CommentsController {
 
   // as logged in User
   @UseGuards(JwtAuthGuard)
-  @Post('new/:commentId')
+  @Post('me/:topicId')
   createTopic(
     @Body() dto: CreateCommentDto,
-    @Param('commentId') commentId: string,
+    @Param('topicId') topicId: string,
     @Req() req: RequestWithUser,
   ) {
     const { id } = req.user;
-    return this.commentsService.create(+commentId, id, dto);
+    return this.commentsService.create(+topicId, id, dto);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch('update/:commentId')
+  @Patch('me/:commentId')
   updateMap(
     @Body() dto: UpdateCommentDto,
     @Param('commentId') commentId: string,
@@ -81,7 +81,7 @@ export class CommentsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete('delete/:commentId')
+  @Delete('me/:commentId')
   deleteMap(
     @Param('commentId') commentId: string,
     @Req() req: RequestWithUser,

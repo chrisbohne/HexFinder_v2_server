@@ -20,8 +20,8 @@ export class CommentsService {
     return this.prisma.comment.create({
       data: {
         ...dto,
-        User: { connect: { id: userId } },
-        Topic: { connect: { id: topicId } },
+        user: { connect: { id: userId } },
+        topic: { connect: { id: topicId } },
       },
     });
   }
