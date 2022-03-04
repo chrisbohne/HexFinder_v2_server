@@ -27,7 +27,7 @@ export class TopicsService {
   async findOne(id: number): Promise<TopicEntity> {
     const topic = await this.prisma.topic.findUnique({
       where: { id },
-      include: { comments: true, user: true },
+      include: { comments: true, user: { select: { name: true } } },
     });
     if (!topic) throw new NotFoundException('Topic not found');
     return topic;
@@ -38,7 +38,7 @@ export class TopicsService {
     userId: number,
     dto: UpdateTopicDto,
   ): Promise<TopicEntity> {
-    const topic = await this.prisma.map.findUnique({ where: { id: topicId } });
+    const topic = await this.findOne(topicId);
 
     if (!topic || topic.userId !== userId) {
       throw new ForbiddenException('Access denied');
@@ -60,7 +60,7 @@ export class TopicsService {
   }
 
   async remove(topicId: number, userId: number): Promise<string> {
-    const topic = await this.prisma.map.findUnique({ where: { id: topicId } });
+    const topic = await this.findOne(topicId);
 
     if (!topic || topic.userId !== userId) {
       throw new ForbiddenException('Access denied');
