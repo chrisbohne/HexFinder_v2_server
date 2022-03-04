@@ -20,22 +20,22 @@ export class MapController {
 
   // as admin
 
-  @Post(':userId')
+  @Post('new/:userId')
   create(@Param('userId') userId: string, @Body() dto: CreateMapDto) {
     return this.mapService.create(dto, +userId);
   }
 
-  @Get()
+  @Get('get')
   findAll() {
     return this.mapService.findAll();
   }
 
-  @Get(':id')
+  @Get('get/:id')
   findOne(@Param('id') id: string) {
     return this.mapService.findOne(+id);
   }
 
-  @Patch(':mapId/:userId')
+  @Patch('/update/:mapId/:userId')
   update(
     @Param('mapId') mapId: string,
     @Param('userId') userId: string,
@@ -44,7 +44,7 @@ export class MapController {
     return this.mapService.update(+mapId, +userId, dto);
   }
 
-  @Delete(':mapId/:userId')
+  @Delete('/delete/:mapId/:userId')
   remove(@Param('mapId') mapId: string, @Param('userId') userId: string) {
     return this.mapService.remove(+mapId, +userId);
   }
@@ -52,14 +52,14 @@ export class MapController {
   // as logged in user
 
   @UseGuards(JwtAuthGuard)
-  @Post('new')
+  @Post('/me')
   createMap(@Body() dto: CreateMapDto, @Req() req: RequestWithUser) {
     const { id } = req.user;
     return this.mapService.create(dto, id);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch('update/:mapId')
+  @Patch('me/:mapId')
   updateMap(
     @Body() dto: UpdateMapDto,
     @Param('mapId') mapId: string,
@@ -70,7 +70,7 @@ export class MapController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete('delete/:mapId')
+  @Delete('me/:mapId')
   deleteMap(@Param('mapId') mapId: string, @Req() req: RequestWithUser) {
     const { id } = req.user;
     return this.mapService.remove(+mapId, id);

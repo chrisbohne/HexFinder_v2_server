@@ -19,8 +19,6 @@ export class UserService {
       const user = await this.prisma.user.create({
         data: { ...dto, password: hash },
       });
-
-      delete user.password;
       return user;
     } catch (error) {
       if (
@@ -43,7 +41,6 @@ export class UserService {
       include: { maps: true, topics: true, comments: true },
     });
     if (!user) throw new NotFoundException();
-    delete user.password;
     return user;
   }
 
@@ -53,7 +50,6 @@ export class UserService {
         where: { id },
         data: dto,
       });
-      delete updatedUser.password;
       return updatedUser;
     } catch (error) {
       if (
@@ -67,7 +63,8 @@ export class UserService {
 
   async remove(id: number): Promise<string> {
     try {
-      await this.prisma.user.delete({ where: { id } });
+      await this.prisma.map.deleteMany({ where: { userId: id } });
+      await this.prisma.user.delete({ where: { id }, include: { maps: true } });
       return 'User deleted';
     } catch (error) {
       if (

@@ -1,10 +1,11 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/users/user.service';
-import { RegisterDto, AuthResponse, LoginDto } from './dto';
+import { RegisterDto, LoginDto } from './dto';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { AuthEntity } from './entitiy/Auth.entity';
 
 @Injectable()
 export class AuthService {
@@ -15,14 +16,14 @@ export class AuthService {
     private prisma: PrismaService,
   ) {}
 
-  async register(dto: RegisterDto): Promise<AuthResponse> {
+  async register(dto: RegisterDto): Promise<AuthEntity> {
     const user = await this.userService.create(dto);
 
     const cookie = await this.getCookieWithJwtToken(user.id, user.email);
-    return { cookie, user };
+    return { ...user, cookie };
   }
 
-  async login(dto: LoginDto): Promise<AuthResponse> {
+  async login(dto: LoginDto): Promise<AuthEntity> {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
@@ -32,9 +33,7 @@ export class AuthService {
 
     const cookie = await this.getCookieWithJwtToken(user.id, user.email);
 
-    delete user.password;
-
-    return { cookie, user };
+    return { ...user, cookie };
   }
 
   async verifyPassword(password: string, hash: string) {
@@ -45,8 +44,10 @@ export class AuthService {
 
   async getCookieWithJwtToken(userId: number, email: string): Promise<string> {
     const payload = { sub: userId, email };
-    const secret = this.configService.get('JWT_SECRET');
-    const expiresIn = this.configService.get('JWT_EXPIRATION_TIME');
+    const secret = this.configService.get('JWT_ACCESS_TOKEN_SECRET');
+    const expiresIn = this.configService.get(
+      'JWT_ACCESS_TOKEN_EXPIRATION_TIME',
+    );
     const token = await this.jwtService.signAsync(payload, {
       expiresIn,
       secret,
@@ -55,6 +56,6 @@ export class AuthService {
   }
 
   getCookieForLogout() {
-    return `Authentication=; HttpOnly; Path=/; Max-Age=0`;
+    return 'Authentication=; HttpOnly; Path=/; Max-Age=0';
   }
 }

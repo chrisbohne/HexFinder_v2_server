@@ -1,7 +1,7 @@
 import { User } from '@prisma/client';
 import { Exclude } from 'class-transformer';
 
-export class UserEntity implements User {
+export class AuthEntity implements User {
   id: number;
   @Exclude()
   createdAt: Date;
@@ -9,11 +9,11 @@ export class UserEntity implements User {
   updateAt: Date;
   name: string;
   email: string;
-
-  @Exclude()
+  @Exclude({ toPlainOnly: true })
   password: string;
+  cookie: string;
 
-  constructor(partial: Partial<UserEntity>) {
+  constructor(partial: Partial<AuthEntity>) {
     Object.assign(this, partial);
   }
 }

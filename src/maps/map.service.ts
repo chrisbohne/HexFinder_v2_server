@@ -14,7 +14,7 @@ export class MapService {
 
   create(dto: CreateMapDto, userId: number): Promise<MapEntity> {
     return this.prisma.map.create({
-      data: { ...dto, User: { connect: { id: userId } } },
+      data: { ...dto, user: { connect: { id: userId } } },
     });
   }
 

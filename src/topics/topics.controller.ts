@@ -8,6 +8,8 @@ import {
   Delete,
   UseGuards,
   Req,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { TopicsService } from './topics.service';
 import { CreateTopicDto, UpdateTopicDto } from './dto';
@@ -15,26 +17,27 @@ import { JwtAuthGuard } from 'src/auth/guards';
 import { RequestWithUser } from 'src/auth/interfaces';
 
 @Controller('topics')
+@UseInterceptors(ClassSerializerInterceptor)
 export class TopicsController {
   constructor(private readonly topicsService: TopicsService) {}
 
   // as Admin
-  @Post(':userId')
+  @Post('new/:userId')
   create(@Body() dto: CreateTopicDto, @Param('userId') userId: string) {
     return this.topicsService.create(dto, +userId);
   }
 
-  @Get()
+  @Get('get')
   findAll() {
     return this.topicsService.findAll();
   }
 
-  @Get(':id')
+  @Get('get/:id')
   findOne(@Param('id') id: string) {
     return this.topicsService.findOne(+id);
   }
 
-  @Patch(':topicId/:userId')
+  @Patch('update/:topicId/:userId')
   update(
     @Param('topicId') topicId: string,
     @Param('userId') userId: string,
@@ -43,21 +46,21 @@ export class TopicsController {
     return this.topicsService.update(+topicId, +userId, dto);
   }
 
-  @Delete(':topicId/:userId')
+  @Delete('delete/:topicId/:userId')
   remove(@Param('topicId') topicId: string, @Param('userId') userId: string) {
     return this.topicsService.remove(+topicId, +userId);
   }
 
   // as logged in User
   @UseGuards(JwtAuthGuard)
-  @Post('new')
+  @Post('me')
   createTopic(@Body() dto: CreateTopicDto, @Req() req: RequestWithUser) {
     const { id } = req.user;
     return this.topicsService.create(dto, id);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch('update/:topicId')
+  @Patch('me/:topicId')
   updateMap(
     @Body() dto: UpdateTopicDto,
     @Param('topicId') topicId: string,
@@ -68,7 +71,7 @@ export class TopicsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete('delete/:topicId')
+  @Delete('me/:topicId')
   deleteMap(@Param('topicId') topicId: string, @Req() req: RequestWithUser) {
     const { id } = req.user;
     return this.topicsService.remove(+topicId, id);

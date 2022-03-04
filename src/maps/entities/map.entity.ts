@@ -6,6 +6,10 @@ export class MapEntity implements Map {
   updatedAt: Date;
   name: string;
   mapData: string;
-  userId: number;
   public: boolean;
+  userId: number;
+
+  constructor(partial: Partial<MapEntity>) {
+    Object.assign(this, partial);
+  }
 }

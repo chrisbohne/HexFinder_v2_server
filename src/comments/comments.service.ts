@@ -20,8 +20,8 @@ export class CommentsService {
     return this.prisma.comment.create({
       data: {
         ...dto,
-        User: { connect: { id: userId } },
-        Topic: { connect: { id: topicId } },
+        user: { connect: { id: userId } },
+        topic: { connect: { id: topicId } },
       },
     });
   }
@@ -41,7 +41,7 @@ export class CommentsService {
     userId: number,
     dto: UpdateCommentDto,
   ): Promise<CommentEntity> {
-    const map = await this.prisma.map.findUnique({ where: { id: commentId } });
+    const map = await this.findOne(commentId);
 
     if (!map || map.userId !== userId) {
       throw new ForbiddenException('Access denied');
@@ -63,7 +63,7 @@ export class CommentsService {
   }
 
   async remove(commentId: number, userId: number): Promise<string> {
-    const map = await this.prisma.map.findUnique({ where: { id: commentId } });
+    const map = await this.findOne(commentId);
 
     if (!map || map.userId !== userId) {
       throw new ForbiddenException('Access denied');
