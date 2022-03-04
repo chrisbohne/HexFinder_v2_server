@@ -5,7 +5,8 @@ import { RegisterDto, LoginDto } from './dto';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AuthEntity } from './entitiy/Auth.entity';
+import { UserEntity } from 'src/users/entities';
+import { TokenPayload } from './interfaces';
 
 @Injectable()
 export class AuthService {
@@ -16,14 +17,11 @@ export class AuthService {
     private prisma: PrismaService,
   ) {}
 
-  async register(dto: RegisterDto): Promise<AuthEntity> {
-    const user = await this.userService.create(dto);
-
-    const cookie = await this.getCookieWithJwtToken(user.id, user.email);
-    return { ...user, cookie };
+  async register(dto: RegisterDto): Promise<UserEntity> {
+    return await this.userService.create(dto);
   }
 
-  async login(dto: LoginDto): Promise<AuthEntity> {
+  async login(dto: LoginDto): Promise<UserEntity> {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
@@ -31,9 +29,7 @@ export class AuthService {
 
     await this.verifyPassword(dto.password, user.password);
 
-    const cookie = await this.getCookieWithJwtToken(user.id, user.email);
-
-    return { ...user, cookie };
+    return user;
   }
 
   async verifyPassword(password: string, hash: string) {
@@ -42,8 +38,8 @@ export class AuthService {
       throw new UnauthorizedException('Wrong credentials provided');
   }
 
-  async getCookieWithJwtToken(userId: number, email: string): Promise<string> {
-    const payload = { sub: userId, email };
+  async getCookieWithJwtAccessToken(userId: number): Promise<string> {
+    const payload: TokenPayload = { userId };
     const secret = this.configService.get('JWT_ACCESS_TOKEN_SECRET');
     const expiresIn = this.configService.get(
       'JWT_ACCESS_TOKEN_EXPIRATION_TIME',
@@ -55,7 +51,29 @@ export class AuthService {
     return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${expiresIn}`;
   }
 
+  async getCookieWithJwtRefreshToken(
+    userId: number,
+  ): Promise<{ cookie: string; token: string }> {
+    const payload: TokenPayload = { userId };
+    const secret = this.configService.get('JWT_REFRESH_TOKEN_SECRET');
+    const expiresIn = this.configService.get(
+      'JWT_REFRESH_TOKEN_EXPIRATION_TIME',
+    );
+    const token = await this.jwtService.signAsync(payload, {
+      expiresIn,
+      secret,
+    });
+    const cookie = `Refresh=${token}; HttpOnly; Path=/; Max-Age=${expiresIn}`;
+    return {
+      cookie,
+      token,
+    };
+  }
+
   getCookieForLogout() {
-    return 'Authentication=; HttpOnly; Path=/; Max-Age=0';
+    return [
+      'Authentication=; HttpOnly; Path=/; Max-Age=0',
+      'Refresh=; HttpOnly; Path=/; Max-Age=0',
+    ];
   }
 }
