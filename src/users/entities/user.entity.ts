@@ -7,7 +7,7 @@ export class UserEntity implements User {
   createdAt: Date;
   @Exclude()
   updateAt: Date;
-  name: string;
+  username: string;
   email: string;
 
   @Exclude()
