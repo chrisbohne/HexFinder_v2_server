@@ -13,7 +13,7 @@ import { UserEntity } from 'src/users/entities';
 import { UserService } from 'src/users/user.service';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto } from './dto';
-import { JwtAuthGuard, JwtRefreshGuard } from './guards';
+import { JwtRefreshGuard, JwtAuthGuard } from './guards';
 import { RequestWithUser } from './interfaces';
 
 @Controller('auth')
@@ -34,15 +34,11 @@ export class AuthController {
   @Post('login')
   async login(@Body() dto: LoginDto, @Req() req: RequestWithUser) {
     const user = await this.authService.login(dto);
-    const accessToken = await this.authService.getCookieWithJwtAccessToken(
-      user.id,
-    );
-    const refreshToken = await this.authService.getCookieWithJwtRefreshToken(
-      user.id,
-    );
+    const accessToken = await this.authService.getJwtAccessToken(user.id);
+    const refreshToken = await this.authService.getJwtRefreshToken(user.id);
 
     await this.userService.setCurrentRefreshToken(refreshToken, user.id);
-    req.res.cookie('Refresh', refreshToken, {
+    req.res.cookie('jwt', refreshToken, {
       httpOnly: true,
       sameSite: 'none',
       secure: true,
@@ -59,7 +55,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @HttpCode(200)
-  @Post('logout')
+  @Get('logout')
   async logout(@Req() req: RequestWithUser) {
     await this.userService.removeCurrentRefreshToken(req.user.id);
     req.res.clearCookie('jwt', {
@@ -73,9 +69,7 @@ export class AuthController {
   @UseGuards(JwtRefreshGuard)
   @Get('refresh')
   async refresh(@Req() req: RequestWithUser) {
-    const accessToken = await this.authService.getCookieWithJwtAccessToken(
-      req.user.id,
-    );
-    return accessToken;
+    const accessToken = await this.authService.getJwtAccessToken(req.user.id);
+    return { accessToken, role: req.user.role };
   }
 }

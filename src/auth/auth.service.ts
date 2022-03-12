@@ -38,7 +38,7 @@ export class AuthService {
       throw new UnauthorizedException('Wrong credentials provided');
   }
 
-  async getCookieWithJwtAccessToken(userId: number): Promise<string> {
+  async getJwtAccessToken(userId: number): Promise<string> {
     const payload: TokenPayload = { userId };
     const secret = this.configService.get('JWT_ACCESS_TOKEN_SECRET');
     const expiresIn = this.configService.get(
@@ -51,7 +51,7 @@ export class AuthService {
     return token;
   }
 
-  async getCookieWithJwtRefreshToken(userId: number): Promise<string> {
+  async getJwtRefreshToken(userId: number): Promise<string> {
     const payload: TokenPayload = { userId };
     const secret = this.configService.get('JWT_REFRESH_TOKEN_SECRET');
     const expiresIn = this.configService.get(
@@ -63,12 +63,5 @@ export class AuthService {
     });
 
     return token;
-  }
-
-  getCookieForLogout() {
-    return [
-      'Authentication=; HttpOnly; Path=/; Max-Age=0',
-      'Refresh=; HttpOnly; Path=/; Max-Age=0',
-    ];
   }
 }

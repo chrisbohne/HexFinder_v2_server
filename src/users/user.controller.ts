@@ -53,8 +53,8 @@ export class UserController {
   }
 
   // as logged in user
-  @UseGuards(JwtAuthGuard)
   @Get('me')
+  @UseGuards(JwtAuthGuard)
   async getUser(@Req() req: RequestWithUser) {
     const { id } = req.user;
     return new UserEntity(await this.userService.findOne(id));
