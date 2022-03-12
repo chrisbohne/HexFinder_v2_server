@@ -11,10 +11,12 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { Role } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/guards';
 import { RequestWithUser } from 'src/auth/interfaces';
 import { CreateUserDto, UpdateUserDto } from './dto';
 import { UserEntity } from './entities';
+import { RoleGuard } from './guards';
 import { UserService } from './user.service';
 
 @Controller('users')
@@ -29,6 +31,7 @@ export class UserController {
   }
 
   @Get('get')
+  @UseGuards(RoleGuard(Role.ADMIN))
   async findAll() {
     const users = await this.userService.findAll();
     return users.map((user) => new UserEntity(user));
@@ -69,5 +72,10 @@ export class UserController {
   deleteUser(@Req() req: RequestWithUser) {
     const { id } = req.user;
     return this.userService.remove(id);
+  }
+
+  @Get('/taken/:username')
+  userNameTaken(@Param('username') username: string) {
+    return this.userService.userNameTaken(username);
   }
 }

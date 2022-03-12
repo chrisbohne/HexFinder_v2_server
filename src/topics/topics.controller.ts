@@ -15,6 +15,8 @@ import { TopicsService } from './topics.service';
 import { CreateTopicDto, UpdateTopicDto } from './dto';
 import { JwtAuthGuard } from 'src/auth/guards';
 import { RequestWithUser } from 'src/auth/interfaces';
+import { RoleGuard } from 'src/users/guards';
+import { Role } from '@prisma/client';
 
 @Controller('topics')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -23,6 +25,7 @@ export class TopicsController {
 
   // as Admin
   @Post('new/:userId')
+  @UseGuards(RoleGuard(Role.ADMIN))
   create(@Body() dto: CreateTopicDto, @Param('userId') userId: string) {
     return this.topicsService.create(dto, +userId);
   }

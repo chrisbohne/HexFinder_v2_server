@@ -1,4 +1,4 @@
-import { User } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 import { Exclude } from 'class-transformer';
 
 export class UserEntity implements User {
@@ -9,6 +9,7 @@ export class UserEntity implements User {
   updateAt: Date;
   username: string;
   email: string;
+  role: Role;
 
   @Exclude()
   password: string;
