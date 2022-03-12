@@ -101,4 +101,14 @@ export class UserService {
       data: { hashedRefreshToken: null },
     });
   }
+
+  async userNameTaken(username: string) {
+    try {
+      const user = await this.prisma.user.findUnique({ where: { username } });
+      if (user) return true;
+      return false;
+    } catch (error) {
+      throw error;
+    }
+  }
 }

@@ -13,7 +13,7 @@ import { UserEntity } from 'src/users/entities';
 import { UserService } from 'src/users/user.service';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto } from './dto';
-import { JwtAuthGuard, JwtRefreshGuard } from './guards';
+import { JwtRefreshGuard, JwtAuthGuard } from './guards';
 import { RequestWithUser } from './interfaces';
 
 @Controller('auth')
@@ -34,33 +34,42 @@ export class AuthController {
   @Post('login')
   async login(@Body() dto: LoginDto, @Req() req: RequestWithUser) {
     const user = await this.authService.login(dto);
-    const accessTokenCookie =
-      await this.authService.getCookieWithJwtAccessToken(user.id);
-    const { cookie: refreshTokenCookie, token: refreshToken } =
-      await this.authService.getCookieWithJwtRefreshToken(user.id);
+    const accessToken = await this.authService.getJwtAccessToken(user.id);
+    const refreshToken = await this.authService.getJwtRefreshToken(user.id);
 
     await this.userService.setCurrentRefreshToken(refreshToken, user.id);
-
-    req.res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
-    return new UserEntity(user);
+    req.res.cookie('jwt', refreshToken, {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    return {
+      username: user.username,
+      email: user.email,
+      id: user.id,
+      accessToken,
+      role: user.role,
+    };
   }
 
   @UseGuards(JwtAuthGuard)
   @HttpCode(200)
-  @Post('logout')
+  @Get('logout')
   async logout(@Req() req: RequestWithUser) {
     await this.userService.removeCurrentRefreshToken(req.user.id);
-    const cookie = await this.authService.getCookieForLogout();
-    req.res.setHeader('Set-Cookie', cookie);
+    req.res.clearCookie('jwt', {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+    });
     return 'logged out';
   }
 
   @UseGuards(JwtRefreshGuard)
   @Get('refresh')
   async refresh(@Req() req: RequestWithUser) {
-    const accessTokenCookie =
-      await this.authService.getCookieWithJwtAccessToken(req.user.id);
-    req.res.setHeader('Set-Cookie', accessTokenCookie);
-    return new UserEntity(req.user);
+    const accessToken = await this.authService.getJwtAccessToken(req.user.id);
+    return { accessToken, role: req.user.role };
   }
 }
