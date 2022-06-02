@@ -14,9 +14,6 @@ export class UserEntity implements User {
   @Exclude()
   password: string;
 
-  @Exclude()
-  hashedRefreshToken: string;
-
   constructor(partial: Partial<UserEntity>) {
     Object.assign(this, partial);
   }

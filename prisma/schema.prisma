@@ -16,7 +16,7 @@ model User {
   email    String @unique
   role  Role @default(USER)
   password String
-  hashedRefreshToken String?
+  // hashedRefreshToken String?
 
   maps     Map[]
   topics   Topic[]
@@ -30,6 +30,7 @@ model Map {
 
   name    String
   mapData String
+  size    Int
   public  Boolean @default(true)
   user    User?   @relation(fields: [userId], references: [id])
   userId  Int?

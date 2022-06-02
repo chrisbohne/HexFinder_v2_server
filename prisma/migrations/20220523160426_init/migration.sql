@@ -10,7 +10,6 @@ CREATE TABLE "User" (
     "email" TEXT NOT NULL,
     "role" "Role" NOT NULL DEFAULT E'USER',
     "password" TEXT NOT NULL,
-    "hashedRefreshToken" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
@@ -22,6 +21,7 @@ CREATE TABLE "Map" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "name" TEXT NOT NULL,
     "mapData" TEXT NOT NULL,
+    "size" INTEGER NOT NULL,
     "public" BOOLEAN NOT NULL DEFAULT true,
     "userId" INTEGER,
 

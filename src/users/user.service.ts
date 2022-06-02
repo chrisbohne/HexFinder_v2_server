@@ -44,16 +44,16 @@ export class UserService {
     return user;
   }
 
-  async getUserIfRefreshTokenMatches(refreshToken: string, userId: number) {
-    const user = await this.findOne(userId);
+  // async getUserIfRefreshTokenMatches(refreshToken: string, userId: number) {
+  //   const user = await this.findOne(userId);
 
-    const isRefreshTokenMatching = await bcrypt.compare(
-      refreshToken,
-      user.hashedRefreshToken,
-    );
+  //   const isRefreshTokenMatching = await bcrypt.compare(
+  //     refreshToken,
+  //     user.hashedRefreshToken,
+  //   );
 
-    if (isRefreshTokenMatching) return user;
-  }
+  //   if (isRefreshTokenMatching) return user;
+  // }
 
   async update(id, dto: UpdateUserDto): Promise<UserEntity> {
     try {
@@ -85,21 +85,6 @@ export class UserService {
         throw new NotFoundException('User not found');
       } else throw error;
     }
-  }
-
-  async setCurrentRefreshToken(refreshToken: string, userId: number) {
-    const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { hashedRefreshToken },
-    });
-  }
-
-  removeCurrentRefreshToken(userId: number) {
-    return this.prisma.user.update({
-      where: { id: userId },
-      data: { hashedRefreshToken: null },
-    });
   }
 
   async userNameTaken(username: string) {
