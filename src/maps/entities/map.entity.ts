@@ -6,6 +6,7 @@ export class MapEntity implements Map {
   updatedAt: Date;
   name: string;
   mapData: string;
+  size: number;
   public: boolean;
   userId: number;
 

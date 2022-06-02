@@ -37,12 +37,11 @@ export class AuthController {
     const accessToken = await this.authService.getJwtAccessToken(user.id);
     const refreshToken = await this.authService.getJwtRefreshToken(user.id);
 
-    await this.userService.setCurrentRefreshToken(refreshToken, user.id);
     req.res.cookie('jwt', refreshToken, {
       httpOnly: true,
       sameSite: 'none',
       secure: true,
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 24 * 60 * 60 * 1000 * 30,
     });
     return {
       username: user.username,
@@ -57,7 +56,6 @@ export class AuthController {
   @HttpCode(200)
   @Get('logout')
   async logout(@Req() req: RequestWithUser) {
-    await this.userService.removeCurrentRefreshToken(req.user.id);
     req.res.clearCookie('jwt', {
       httpOnly: true,
       sameSite: 'none',
@@ -70,6 +68,11 @@ export class AuthController {
   @Get('refresh')
   async refresh(@Req() req: RequestWithUser) {
     const accessToken = await this.authService.getJwtAccessToken(req.user.id);
-    return { accessToken, role: req.user.role };
+    return {
+      accessToken,
+      username: req.user.username,
+      email: req.user.email,
+      role: req.user.role,
+    };
   }
 }
